@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
 // unique id
 const { v4: uuidv4 } = require("uuid");
 
-// a blueprint to represent how mongodb should expect and represent the user 
+// a blueprint to represent how mongodb should expect and represent the user
 const userSchema = new mongoose.Schema({
     id:{
         type: String,
@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ["patient", "doctor"], 
+        enum: ["patient", "doctor"],
         default: "patient"
     }, 
 
@@ -62,6 +62,7 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
 
 userSchema.index({ email: 1 });
 
