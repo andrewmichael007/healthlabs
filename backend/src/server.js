@@ -19,7 +19,7 @@ const morgan = require("morgan");
 //allows to make use of the .env file
 require("dotenv").config();
 
-//using helmet for protection against click jacking, cross sitee scripting
+//helmet for protection against click jacking, cross sitee scripting
 const helmet = require("helmet");
 
 const authRoutes = require('./routes/auth');
@@ -38,14 +38,20 @@ app.use(cors
     })
 );
 
+app.use(morgan("dev"));
+
 app.use(express.json());
 
-// Basic rate limiter to protect auth endpoints
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 60 // limit each IP to 60 requests per windowMs
+
+// setting up basic rate limiter to protect auth endpoints
+const apiLimiter = rateLimit({
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MINUTES) * 60 * 1000,
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUEST), // limit each IP to 100 requests per windowMs
+    message: "Too many requests, please try again later."
 });
-app.use(limiter);
+
+//using the rate limter
+app.use(apiLimiter);
 
 
 app.use('/api/auth', authRoutes);
