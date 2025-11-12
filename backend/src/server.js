@@ -1,6 +1,6 @@
 //requiring statements
 
-const mongoose = require("mongooose");
+const mongoose = require("mongoose");
 
 //loading the environment files
 require("dotenv").config();
@@ -22,10 +22,10 @@ require("dotenv").config();
 //helmet for protection against click jacking, cross sitee scripting
 const helmet = require("helmet");
 
-const authRoutes = require('./routes/auth');
+const authRoutes = require("./routes/authRoute");
 
 //this handles the error
-const { errorHandler } = require('./middlewares/errorHandler');
+const { errorHandler } = require("./middlewares/errorHandler");
 
 //this is creating the mini app
 const app = express();
@@ -42,19 +42,21 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
+// "node --watch userServer.js"
 
 // setting up basic rate limiter to protect auth endpoints
-const apiLimiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MINUTES) * 60 * 1000,
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUEST), // limit each IP to 100 requests per windowMs
-    message: "Too many requests, please try again later."
-});
+// const apiLimiter = rateLimit({
+//     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MINUTES) * 60 * 1000,
+//     max: parseInt(process.env.RATE_LIMIT_MAX_REQUEST), // limit each IP to 100 requests per windowMs
+//     message: "Too many requests, please try again later."
+// });
 
 //using the rate limter
-app.use(apiLimiter);
+// app.use(apiLimiter);
 
 
-app.use('/api/auth', authRoutes);
+// create  server mount
+app.use("/api/auth/", authRoutes);
 
 // error handler last
 app.use(errorHandler);
@@ -75,4 +77,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = app; // for testing
+// module.exports = app; // for testing
