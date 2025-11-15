@@ -1,26 +1,41 @@
 // src/routes/vitals.js
-const express = require('express');
-const { body, param, query, validationResult } = require('express-validator');
-const axios = require('axios');
-const Vital = require('../models/Vital');
-const { authMiddleware, roleMiddleware } = require('../middlewares/auth');
-const redis = require('../utils/redisClient');
+const express = require("express");
+const { body, param, query, validationResult } = require("express-validator");
 
-const router = express.Router();
+//axios is used to  call an external ML Service
+const axios = require("axios");
+const Vital = require("../models/vitals");
+const { authMiddleware, roleMiddleware } = require("../middlewares/auth");
+// const redis = require('../utils/redisClient');
 
-// Helper: validate ranges
+// const router = express.Router();
+
+//  validation of ranges
 function validateRanges(data) {
-  const errors = [];
-  const { heartRate, systolic, diastolic, spo2, temperatureC } = data;
-  if (heartRate < 20 || heartRate > 220) errors.push('heartRate out of range (20-220)');
-  if (systolic < 60 || systolic > 250) errors.push('systolic out of range (60-250)');
-  if (diastolic < 40 || diastolic > 150) errors.push('diastolic out of range (40-150)');
-  if (spo2 < 50 || spo2 > 100) errors.push('spo2 out of range (50-100)');
-  if (temperatureC < 30 || temperatureC > 43) errors.push('temperatureC out of range (30-43)');
-  return errors;
-}
 
-// Cache helpers
+  //making dictionary of errors to hold errors
+  const errors = [];
+
+  //define the request body
+  const { heartRate, systolic, diastolic, spo2, temperature } = data;
+
+  //heart rate should be between 20 and 220
+  if (heartRate < 20 || heartRate > 220) errors.push("heartRate out of range (20-220)");
+
+  //systolic reading should be between 60 and 250
+  if (systolic < 60 || systolic > 250) errors.push("systolic out of range (60-250)");
+
+  if (diastolic < 40 || diastolic > 150) errors.push('diastolic out of range (40-150)');
+
+  if (spo2 < 50 || spo2 > 100) errors.push('spo2 out of range (50-100)');
+
+  if (temperatureC < 30 || temperatureC > 43) errors.push('temperatureC out of range (30-43)');
+
+  //return errors if there any
+  return errors;
+};
+
+// cache helpers
 function vitalsCacheKey(userId, limit) {
   return `vitals:${userId}:limit:${limit}`;
 }
