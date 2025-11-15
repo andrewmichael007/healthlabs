@@ -1,11 +1,12 @@
 //requiring statements
-
 const mongoose = require("mongoose");
 
 //loading the environment files
 require("dotenv").config();
 
 const express = require("express");
+
+const { createClient } = require("redis");
 
 //controlling the amount of hits to the database within a specific time
 const rateLimit = require("express-rate-limit");
@@ -42,6 +43,11 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
+// error handler last
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 4000;
+
 // "node --watch userServer.js"
 
 // setting up basic rate limiter to protect auth endpoints
@@ -54,17 +60,42 @@ app.use(express.json());
 //using the rate limter
 // app.use(apiLimiter);
 
+// redis connection
+const redisClient = createClient({
+    url: process.env.REDIS_URL
+});
+
+redisClient.on("error", (err) =>
+    console.log("Redis Client Error", err)
+);
+
+redisClient.connect();
+
+redisClient.on("connect", () => 
+    console.log("Connected to Redis")
+);
+
+//attaching redis as middleware for route use
+app.use((req, res, next) => {
+  req.redis = redisClient; // attach redis to req for route use
+  next();
+});
+
 
 // create  server mount
 app.use("/api/auth/", authRoutes);
 
-// error handler last
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 4000;
 
 async function start() {
-  await mongoose.connect(process.env.MONGO_URI, { });
+
+  await mongoose.connect(process.env.MONGO_URI, { })
+  .then( () =>
+    console.log("Connected to MongoDb")
+  )
+  .catch(err =>
+    console.error(err)
+  );
+  
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
