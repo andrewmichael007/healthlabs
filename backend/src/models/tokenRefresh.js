@@ -39,4 +39,4 @@ const tokenRefreshSchema = new mongoose.Schema({
 // TTL index optional for cleanup (ensure expiresAt is in the future)
 tokenRefreshSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('tokenRefresh', tokenRefreshSchema);
+module.exports = mongoose.model("tokenRefresh", tokenRefreshSchema);
