@@ -1,5 +1,6 @@
 // src/routes/vitals.js
 const express = require("express");
+
 const { body, param, query, validationResult } = require("express-validator");
 
 //axios is used to  call an external ML Service
