@@ -3,9 +3,7 @@ const mongoose = require("mongoose");
 
 //loading the environment files
 require("dotenv").config();
-
 const express = require("express");
-
 const { createClient } = require("redis");
 
 //controlling the amount of hits to the database within a specific time
@@ -33,9 +31,9 @@ const app = express();
 
 app.use(helmet());
 
-app.use(cors 
-    ({ origin: true, 
-        credentials: true 
+app.use(cors
+    ({ origin: true,
+        credentials: true
     })
 );
 
@@ -81,11 +79,8 @@ app.use((req, res, next) => {
   next();
 });
 
-
 // create  server mount
 app.use("/api/auth/", authRoutes);
-
-
 async function start() {
 
   await mongoose.connect(process.env.MONGO_URI, { })
@@ -109,3 +104,5 @@ if (require.main === module) {
 }
 
 // module.exports = app; // for testing
+
+
