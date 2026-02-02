@@ -12,7 +12,7 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ 
       success: false,
       message: "Authorization header missing" 
-    });
+    });  
   }
 
   //getting the token aspect from the header
@@ -33,7 +33,7 @@ function authMiddleware(req, res, next) {
 
   // log the token to check 
   console.log (token);
-
+ 
   try {
     const payload = verifyAccessToken(token);
 
@@ -54,8 +54,6 @@ function authMiddleware(req, res, next) {
     });
   }
 }
-
-
 
 function roleMiddleware(requiredRoles = []) {
 
