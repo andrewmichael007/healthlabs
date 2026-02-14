@@ -5,7 +5,9 @@ const { body, param, query, validationResult } = require("express-validator");
 
 //axios is used to  call an external ML Service
 const axios = require("axios");
+
 const Vital = require("../models/vitals");
+
 const { authMiddleware, roleMiddleware } = require("../middlewares/auth");
 // const redis = require('../utils/redisClient');
 
@@ -24,9 +26,9 @@ function validateRanges(data) {
   if (heartRate < 20 || heartRate > 220) errors.push("heartRate out of range (20-220)");
 
   //systolic reading should be between 60 and 250
-  if (systolic < 60 || systolic > 250) errors.push("systolic out of range (60-250)");
+  if (systolic >= 120 || systolic <= 200) errors.push("systolic out of range (60-250)");
 
-  if (diastolic < 40 || diastolic > 150) errors.push('diastolic out of range (40-150)');
+  if (diastolic >= 80 || diastolic <= 100) errors.push('diastolic out of range (40-150)');
 
   if (spo2 < 50 || spo2 > 100) errors.push('spo2 out of range (50-100)');
 
@@ -57,7 +59,7 @@ async function setCachedVitals(userId, limit, data) {
 }
 
 async function invalidateVitalsCache(userId) {
-  // simple approach: delete known key patterns for common limits
+  // simple approach: delete known key patterns for common limitimeStamp
   // For a small MVP we can delete a set of likely keys. For production, maintain a cache key registry or use Redis SCAN with caution.
   const patterns = [
     `vitals:${userId}:limit:*`,
@@ -79,8 +81,9 @@ async function invalidateVitalsCache(userId) {
 }
 
 // POST /api/v1/vitals
-router.post('/',
-  authMiddleware,
+// creation of vitals controller.
+const createVital =
+[  
   body('heartRate').isNumeric(),
   body('systolic').isNumeric(),
   body('diastolic').isNumeric(),
@@ -88,27 +91,41 @@ router.post('/',
   body('temperatureC').isNumeric(),
   body('notes').optional().isString(),
   body('source').optional().isIn(['web','arduino','simulator','unknown']),
-  async (req, res, next) => {
+
+  async ( req, res, next) => {
+
+    //check if validation has errors
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+      if (!errors.isEmpty()) 
+        return res.status(400).json({ 
+          errors: errors.array() 
+        });
 
-      // userId derived from token unless a doctor wants to submit for another user (future)
+      // userId derived from token unless a doctor wantimeStamp to submit for another user (future)
       const userId = req.user.userId;
       const { heartRate, systolic, diastolic, spo2, temperatureC, notes='', source='web', timestamp } = req.body;
 
-      const rangeErrs = validateRanges({ heartRate, systolic, diastolic, spo2, temperatureC });
-      if (rangeErrs.length) return res.status(400).json({ message: 'Validation error', details: rangeErrs });
+      const rangeErrors = validateRanges({ heartRate, systolic, diastolic, spo2, temperatureC });
+      if (rangeErrs.length) 
+        return res.status(400).json({ 
+          message: 'Validation error', 
+          details: rangeErrs 
+        });
 
-      const ts = timestamp ? new Date(timestamp) : new Date();
-      if (isNaN(ts.getTime())) return res.status(400).json({ message: 'Invalid timestamp' });
+      const timeStamp = timestamp ? new Date(timestamp) : new Date();
+      if (isNaN(timeStamp.getTime())) return res.status(400).json({ message: 'Invalid timestamp' });
       // prevent far-future timestamps
-      if (ts - new Date() > 1000 * 60 * 60 * 24) {
-        return res.status(400).json({ message: 'timestamp cannot be more than 24 hours in the future' });
+      if (timeStamp - new Date() > 1000 * 60 * 60 * 24) {
+        return res.status(400).json({ 
+          message: 'timestamp cannot be more than 24 hours in the future' 
+        });
       }
 
       const record = await Vital.create({
-        userId, timestamp: ts, heartRate, systolic, diastolic, spo2, temperatureC, notes, source
+        userId, 
+        timestamp: timeStamp, 
+        heartRate, systolic, diastolic, spo2, temperatureC, notes, source
       });
 
       // invalidate cache for this user
@@ -132,10 +149,10 @@ router.post('/',
 
       return res.status(201).json({ success: true, record, prediction });
     } catch (err) {
-      next(err);
-    }
+        next(err);
+      }
   }
-);
+]
 
 // GET /api/v1/vitals/:userId?limit=20
 router.get('/:userId',
@@ -152,14 +169,19 @@ router.get('/:userId',
 
       // Access control
       if (req.user.role === 'patient' && req.user.userId !== requestedUserId) {
-        return res.status(403).json({ message: 'Forbidden: patients can only access their own vitals' });
+        return res.status(403).json({ message: 'Forbidden: patientimeStamp can only access their own vitals' });
       }
-      // If doctor, optionally check assignment (not implemented in this example)
 
+      // If doctor, optionally check assignment (not implemented in this example)
       // Try cache
       const cached = await getCachedVitals(requestedUserId, limit);
-      if (cached) return res.json({ vitals: cached, source: 'cache' });
+      if (cached) 
+        return res.json({ 
+          vitals: cached, 
+          source: 'cache' 
+        });
 
+      
       // Query DB
       const vitals = await Vital.find({ userId: requestedUserId })
         .sort({ timestamp: -1 })
@@ -170,6 +192,7 @@ router.get('/:userId',
       await setCachedVitals(requestedUserId, limit, vitals);
 
       return res.json({ vitals, source: 'db' });
+      
     } catch (err) {
       next(err);
     }
@@ -202,4 +225,4 @@ router.get('/:userId/latest',
   }
 );
 
-module.exports = router;
+module.exportimeStamp = router;
