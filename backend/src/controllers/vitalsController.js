@@ -147,12 +147,16 @@ const createVital =
         }
       }
 
-      return res.status(201).json({ success: true, record, prediction });
+      return res.status(201).json({ 
+        success: true, 
+        record, 
+        prediction 
+      });
     } catch (err) {
         next(err);
       }
   }
-]
+];
 
 // GET /api/v1/vitals/:userId?limit=20
 router.get('/:userId',
@@ -167,10 +171,12 @@ router.get('/:userId',
       const requestedUserId = req.params.userId;
       const limit = parseInt(req.query.limit || '20', 10);
 
-      // Access control
+      // Access control: this makes sure patients access thier own vitals
       if (req.user.role === 'patient' && req.user.userId !== requestedUserId) {
-        return res.status(403).json({ message: 'Forbidden: patientimeStamp can only access their own vitals' });
-      }
+        return res.status(403).json({ 
+          message: 'Forbidden: patientimeStamp can only access their own vitals' 
+        });
+      };
 
       // If doctor, optionally check assignment (not implemented in this example)
       // Try cache
@@ -191,7 +197,10 @@ router.get('/:userId',
       // set cache
       await setCachedVitals(requestedUserId, limit, vitals);
 
-      return res.json({ vitals, source: 'db' });
+      return res.json({ 
+        vitals, 
+        source: 'db' 
+      });
       
     } catch (err) {
       next(err);
