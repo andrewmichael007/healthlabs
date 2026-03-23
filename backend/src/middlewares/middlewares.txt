@@ -1,0 +1,8 @@
+Definition of middlewares.
+
+middlewares don't directly store data
+they control the flow of requests and protect the logic
+they validate request data
+the add or modify request data
+they handle authentication.
+the catch and handle errors.
