@@ -1,3 +1,5 @@
+//this is the json web token configuration
+
 //requiring to use the json web token
 const jwt = require("jsonwebtoken");
 
@@ -15,7 +17,6 @@ function signAccessToken(payload) {
     { expiresIn }
   );
 }
-
 
 // a function verifyAccessToken takes in the token and verifies using the verify function
 function verifyAccessToken(token) {
